@@ -3,14 +3,14 @@
 #include "data.h"
 #include "random.h"
 
-class RuleNeuron{
+class Rule{
 public:
     std::vector<double> W;
     std::vector<double> dW;
     std::vector<double> out;
     double strength{};
 
-    explicit RuleNeuron()
+    explicit Rule()
         :   W(4),
             dW(4),
             out(2)
@@ -42,18 +42,18 @@ public:
 
     void backward(){
         for(unsigned i = 0; i < W.size(); ++i){
-            W[0] += dW[0];
+            W[i] += dW[i];
         }
     }
 };
 
-class OutputNeuron{
+class Output{
 public:
     std::vector<double> W;
     std::vector<double> dW;
     double out{};
 
-    explicit OutputNeuron()
+    explicit Output()
         :   W(3),
             dW(3)
     {
@@ -71,7 +71,7 @@ public:
 
     void backward(){
         for(unsigned i = 0; i < W.size(); ++i){
-            W[0] += dW[0];
+            W[i] += dW[i];
         }
     }
 
@@ -82,8 +82,8 @@ public:
 
 class FuzzyNeuralNet{
 public:
-    std::vector<RuleNeuron>     rule_neurons{};
-    std::vector<OutputNeuron>   output_neurons{};
+    std::vector<Rule>     rule_neurons{};
+    std::vector<Output>   output_neurons{};
     unsigned rules;
     double out{};
     double lr;
@@ -118,12 +118,12 @@ public:
             rule_neurons.begin(),
             rule_neurons.end(),
             0.,
-            [](double acc, const RuleNeuron& r){ return acc + r.strength;});
+            [](double acc, const Rule& r){ return acc + r.strength;});
         double pi2 = pi*pi;
 
         for (unsigned i = 0; i < rules; ++i){
-            RuleNeuron& rule = rule_neurons[i];
-            OutputNeuron& output = output_neurons[i];
+            Rule& rule = rule_neurons[i];
+            Output& output = output_neurons[i];
 
             double d_rule = 0;
             for (unsigned j = 0; j < rules; ++j){
@@ -164,7 +164,6 @@ public:
         return res/data.size();
     }
 };
-
 
 void train(FuzzyNeuralNet& fnn, const std::vector<std::pair<std::vector<double>, double>>& data, unsigned epochs){
     for (unsigned epoch = 0; epoch < epochs; ++epoch){
